@@ -56,12 +56,12 @@ class Admin_Controller {
         $settings->render_settings_page();
     }
 
-    public function enqueue_scripts($hook) {
-            // Only load on our plugin pages
-            if (strpos($hook, 'customer-management') === false) {
-                return;
-            }
+    public function enqueue_scripts() {
+        $screen = get_current_screen();
+        if (!$screen) return;
 
+        // Customer Management List
+        if ($screen->id === 'toplevel_page_customer-management') {
             // DataTables
             wp_enqueue_style('datatables-css', 'https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css');
             wp_enqueue_script('datatables-js', 'https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js', array('jquery'));
@@ -69,18 +69,24 @@ class Admin_Controller {
             // Plugin assets
             wp_enqueue_style('customer-css', CUSTOMER_URL . 'assets/css/customer.css', array(), CUSTOMER_VERSION);
             wp_enqueue_script('customer-js', CUSTOMER_URL . 'assets/js/customer.js', array('jquery', 'datatables-js'), CUSTOMER_VERSION);
+        }
 
-            // Settings page specific
-            if (strpos($hook, 'customer-settings') !== false) {
-                wp_enqueue_style('settings-css', CUSTOMER_URL . 'assets/css/settings.css', array(), CUSTOMER_VERSION);
+        // Settings & Permissions page
+        if ($screen->id === 'customers_page_customer-settings') {
+            wp_enqueue_style('settings-css', CUSTOMER_URL . 'assets/css/settings.css', array(), CUSTOMER_VERSION);
+
+            $current_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'system';
+            if ($current_tab === 'permissions') {
+                wp_enqueue_script('permissions-js', CUSTOMER_URL . 'assets/js/permissions.js', array('jquery'), CUSTOMER_VERSION, true);
             }
+        }
 
-            wp_localize_script('customer-js', 'customerPlugin', array(
-                'ajaxurl' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('customer_plugin_nonce')
-            ));
+        wp_localize_script('customer-js', 'customerPlugin', array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('customer_plugin_nonce')
+        ));
     }
-
+    
     public function render_main_page() {
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.'));
