@@ -141,4 +141,39 @@ class Customer_Controller {
         }
     }
 
+    public function get_datatable_config() {
+        try {
+            // Verify nonce
+            check_ajax_referer('customer_plugin_nonce', 'nonce');
+
+            // Check if user has permission to view customers
+            if (!current_user_can('crm_view_customers') && !current_user_can('crm_view_own_customers')) {
+                wp_send_json_error(array(
+                    'message' => 'You do not have permission to view customer data'
+                ));
+                return;
+            }
+
+            // Get DataTable configuration
+            $datatable_manager = new \Customer\Includes\DataTable_Manager();
+            $config = $datatable_manager->get_config('customer');
+
+            if (!$config) {
+                wp_send_json_error(array(
+                    'message' => 'Failed to retrieve DataTable configuration'
+                ));
+                return;
+            }
+
+            wp_send_json_success($config);
+
+        } catch (\Exception $e) {
+            wp_send_json_error(array(
+                'message' => 'Error retrieving DataTable configuration: ' . $e->getMessage()
+            ));
+        }
+    }
+
+
+
 }
