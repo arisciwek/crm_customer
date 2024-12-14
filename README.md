@@ -153,7 +153,7 @@ Developed by arisciwek
 ### 1.0.0
 - Initial release
 - Basic customer management
-- Staff management framework
+- Customer's Staff management framework
 - Permission system
 - Cache management
 - System settings
