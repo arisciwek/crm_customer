@@ -1,0 +1,86 @@
+/* assets/css/customer.css */
+.customer-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.customer-table-container {
+    flex: 2;
+}
+
+.customer-right-panel {
+    flex: 1;
+    min-width: 300px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: none;
+}
+
+.customer-right-panel.active {
+    display: block;
+}
+
+/* Tab Navigation */
+.tab-navigation {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    background: #f5f5f5;
+    padding: 10px 10px 0;
+}
+
+.tab-button {
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: none;
+    cursor: pointer;
+    margin-right: 4px;
+    border-radius: 4px 4px 0 0;
+}
+
+.tab-button:hover {
+    background: #e5e5e5;
+}
+
+.tab-button.active {
+    background: #fff;
+    border-color: #ddd;
+    margin-bottom: -1px;
+    padding-bottom: 9px;
+}
+
+/* Tab Content */
+.tab-content {
+    padding: 15px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.placeholder-message {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+
+/* Customer Details */
+.customer-detail {
+    margin-bottom: 15px;
+}
+
+.customer-detail label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.customer-detail .value {
+    color: #666;
+}
