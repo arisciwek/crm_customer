@@ -30,11 +30,6 @@
 
  // Get active tab
  $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'system';
-
- // Get current settings
- $customer_settings = get_option('customer_settings', array());
- $cache_settings = get_option('cache_settings', array());
- $datatable_settings = get_option('datatable_settings', array());
  ?>
 
  <div class="wrap">
@@ -53,183 +48,229 @@
 
      <?php settings_errors(); ?>
 
+
      <?php if ($active_tab == 'system'): ?>
+         <form method="post" action="options.php">
+             <?php settings_fields('crm_system_settings'); ?>
 
-         <div class="settings-container" style="margin-top: 20px;">
-             <form method="post" action="options.php">
-                 <?php settings_fields('crm_system_settings'); ?>
-
+             <div class="settings-container">
                  <!-- Customer Code Settings Section -->
                  <div class="settings-section">
-                     <?php do_settings_sections('crm_system_settings'); ?>
+                     <h2>Customer Code Settings</h2>
+                     <?php
+                     $customer_settings = get_option('customer_settings', array());
+                     ?>
+                     <table class="form-table">
+                         <tr>
+                             <th scope="row">Customer Code Prefix</th>
+                             <td>
+                                 <input type="text"
+                                        id="customer_code_prefix"
+                                        name="customer_settings[prefix]"
+                                        value="<?php echo esc_attr(isset($customer_settings['prefix']) ? $customer_settings['prefix'] : 'CUST'); ?>"
+                                        class="regular-text">
+                                 <p class="description">Prefix yang akan digunakan di awal kode customer</p>
+                             </td>
+                         </tr>
+                         <tr>
+                             <th scope="row">Format Type</th>
+                             <td>
+                                 <?php
+                                 $current_format = isset($customer_settings['format_type']) ? $customer_settings['format_type'] : 1;
+                                 $formats = array(
+                                     1 => 'PREFIX/YYYY/MM/XXXXX (e.g., CUST/2024/12/00001)',
+                                     2 => 'PREFIX/YYMM/XXXXX (e.g., CUST/2412/00001)',
+                                     3 => 'PREFIX-XXXXX (e.g., CUST-00001)',
+                                     4 => 'PREFIX-YYYY.MM.XXXXX (e.g., CUST-2024.12.00001)'
+                                 );
+                                 foreach ($formats as $value => $label):
+                                 ?>
+                                 <div class="radio-group">
+                                     <label>
+                                         <input type="radio"
+                                                name="customer_settings[format_type]"
+                                                value="<?php echo esc_attr($value); ?>"
+                                                <?php checked($current_format, $value); ?>>
+                                         <?php echo esc_html($label); ?>
+                                     </label>
+                                 </div>
+                                 <?php endforeach; ?>
+                                 <p class="description">Pilih format untuk kode customer</p>
+                             </td>
+                         </tr>
+                         <tr>
+                             <th scope="row">Number Length</th>
+                             <td>
+                                 <input type="number"
+                                        id="digit_length"
+                                        name="customer_settings[digit_length]"
+                                        value="<?php echo esc_attr(isset($customer_settings['digit_length']) ? $customer_settings['digit_length'] : 5); ?>"
+                                        min="3"
+                                        max="10"
+                                        class="small-text">
+                                 <p class="description">Panjang angka dalam kode (3-10 digit)</p>
+                             </td>
+                         </tr>
+                         <tr>
+                             <th scope="row">Reset Period</th>
+                             <td>
+                                 <?php
+                                 $current_period = isset($customer_settings['reset_period']) ? $customer_settings['reset_period'] : 'monthly';
+                                 ?>
+                                 <div class="radio-group">
+                                     <label>
+                                         <input type="radio"
+                                                name="customer_settings[reset_period]"
+                                                value="monthly"
+                                                <?php checked($current_period, 'monthly'); ?>>
+                                         Monthly
+                                     </label>
+                                 </div>
+                                 <div class="radio-group">
+                                     <label>
+                                         <input type="radio"
+                                                name="customer_settings[reset_period]"
+                                                value="yearly"
+                                                <?php checked($current_period, 'yearly'); ?>>
+                                         Yearly
+                                     </label>
+                                 </div>
+                                 <p class="description">Kapan nomor urut direset</p>
+                             </td>
+                         </tr>
+                     </table>
 
                      <!-- Preview Section -->
-                     <div class="customer-code-preview" style="margin: 20px 0; padding: 20px; background: #fff; border: 1px solid #ddd; border-radius: 4px;">
+                     <div class="customer-code-preview">
                          <h3>
-                             <span>Customer Code Preview</span>
-                             <span class="description" style="font-size: 13px; font-weight: normal; margin-left: 10px;">
-                                 (Live preview based on your settings)
-                             </span>
+                             Customer Code Preview
+                             <span class="description">(Live preview based on your settings)</span>
                          </h3>
-                         <div class="preview-box" style="margin-top: 10px;">
-                             <code id="customer-code-preview" style="font-size: 16px; padding: 10px; background: #f5f5f5; display: inline-block;">
+                         <div class="preview-box">
+                             <code id="customer-code-preview">
                                  <!-- Will be updated via JavaScript -->
                              </code>
                          </div>
                      </div>
                  </div>
 
-                 <?php submit_button('Save Settings'); ?>
-             </form>
-         </div>
+                 <!-- Cache Settings Section -->
+                 <div class="settings-section">
+                     <h2>Cache Settings</h2>
+                     <?php
+                     $cache_settings = get_option('cache_settings', array());
+                     ?>
+                     <table class="form-table">
+                         <tr>
+                             <th scope="row">Enable Cache</th>
+                             <td>
+                                 <label>
+                                     <input type="checkbox"
+                                            name="cache_settings[enabled]"
+                                            value="1"
+                                            <?php checked(isset($cache_settings['enabled']) ? $cache_settings['enabled'] : true); ?>>
+                                     Enable caching system
+                                 </label>
+                                 <p class="description">Enable/disable system caching</p>
+                             </td>
+                         </tr>
+                         <tr>
+                             <th scope="row">Cache Duration</th>
+                             <td>
+                                 <?php
+                                 $current_duration = isset($cache_settings['expiration']) ? $cache_settings['expiration'] : 3600;
+                                 $durations = array(
+                                     1800 => '30 Minutes',
+                                     3600 => '1 Hour',
+                                     7200 => '2 Hours',
+                                     21600 => '6 Hours',
+                                     43200 => '12 Hours',
+                                     86400 => '24 Hours'
+                                 );
+                                 foreach ($durations as $value => $label):
+                                 ?>
+                                 <div class="radio-group">
+                                     <label>
+                                         <input type="radio"
+                                                name="cache_settings[expiration]"
+                                                value="<?php echo esc_attr($value); ?>"
+                                                <?php checked($current_duration, $value); ?>>
+                                         <?php echo esc_html($label); ?>
+                                     </label>
+                                 </div>
+                                 <?php endforeach; ?>
+                                 <p class="description">How long to keep items in cache</p>
+                             </td>
+                         </tr>
+                     </table>
+                 </div>
 
-         <style>
-             .settings-section {
-                 background: #fff;
-                 padding: 20px;
-                 border: 1px solid #ddd;
-                 border-radius: 4px;
-                 margin-bottom: 20px;
-             }
-             .form-table th {
-                 width: 250px;
-                 padding: 20px;
-             }
-             .settings-section h2 {
-                 margin-top: 0;
-                 padding-bottom: 10px;
-                 border-bottom: 1px solid #eee;
-             }
-             .preview-box {
-                 margin-top: 15px;
-             }
-             .description {
-                 color: #666;
-                 font-style: italic;
-             }
-         </style>
+                 <!-- DataTable Settings Section -->
+                 <div class="settings-section">
+                     <h2>DataTable Settings</h2>
+                     <?php
+                     $datatable_settings = get_option('datatable_settings', array());
+                     ?>
+                     <table class="form-table">
+                         <tr>
+                             <th scope="row">Rows Per Page</th>
+                             <td>
+                                 <?php
+                                 $current_rows = isset($datatable_settings['per_page']) ? $datatable_settings['per_page'] : 25;
+                                 $rows_options = array(10, 25, 50, 100);
+                                 foreach ($rows_options as $value):
+                                 ?>
+                                 <div class="radio-group">
+                                     <label>
+                                         <input type="radio"
+                                                name="datatable_settings[per_page]"
+                                                value="<?php echo esc_attr($value); ?>"
+                                                <?php checked($current_rows, $value); ?>>
+                                         <?php echo esc_html($value . ' rows'); ?>
+                                     </label>
+                                 </div>
+                                 <?php endforeach; ?>
+                                 <p class="description">Number of rows to display per page</p>
+                             </td>
+                         </tr>
+                         <tr>
+                             <th scope="row">Default Sort</th>
+                             <td>
+                                 <?php
+                                 $current_sort = isset($datatable_settings['sort_direction']) ? $datatable_settings['sort_direction'] : 'desc';
+                                 ?>
+                                 <div class="radio-group">
+                                     <label>
+                                         <input type="radio"
+                                                name="datatable_settings[sort_direction]"
+                                                value="asc"
+                                                <?php checked($current_sort, 'asc'); ?>>
+                                         Ascending
+                                     </label>
+                                 </div>
+                                 <div class="radio-group">
+                                     <label>
+                                         <input type="radio"
+                                                name="datatable_settings[sort_direction]"
+                                                value="desc"
+                                                <?php checked($current_sort, 'desc'); ?>>
+                                         Descending
+                                     </label>
+                                 </div>
+                                 <p class="description">Default sorting direction</p>
+                             </td>
+                         </tr>
+                     </table>
+                 </div>
+             </div>
 
-         <!-- JavaScript untuk live preview -->
-         <script type="text/javascript">
-         jQuery(document).ready(function($) {
-             // Elements
-             const prefixInput = $('#customer_code_prefix');
-             const formatTypeInputs = $('input[name="customer_settings[format_type]"]');
-             const digitLengthInput = $('#customer_code_digit_length');
-             const previewElement = $('#customer-code-preview');
-
-             // Format date functions
-             function padZero(num) {
-                 return String(num).padStart(2, '0');
-             }
-
-             function getFormattedDate() {
-                 const now = new Date();
-                 return {
-                     year: now.getFullYear(),
-                     shortYear: String(now.getFullYear()).slice(-2),
-                     month: padZero(now.getMonth() + 1)
-                 };
-             }
-
-             // Update preview function
-             function updatePreview() {
-                 const prefix = prefixInput.val() || 'CUST';
-                 const formatType = $('input[name="customer_settings[format_type]"]:checked').val() || '1';
-                 const digits = parseInt(digitLengthInput.val() || '5');
-                 const date = getFormattedDate();
-                 const number = '1'.padStart(digits, '0');
-
-                 let preview = '';
-                 switch(formatType) {
-                     case '1': // PREFIX/YYYY/MM/XXXXX
-                         preview = `${prefix}/${date.year}/${date.month}/${number}`;
-                         break;
-                     case '2': // PREFIX/YYMM/XXXXX
-                         preview = `${prefix}/${date.shortYear}${date.month}/${number}`;
-                         break;
-                     case '3': // PREFIX-XXXXX
-                         preview = `${prefix}-${number}`;
-                         break;
-                     case '4': // PREFIX-YYYY.MM.XXXXX
-                         preview = `${prefix}-${date.year}.${date.month}.${number}`;
-                         break;
-                 }
-
-                 // Update preview dengan animasi
-                 previewElement.fadeOut(200, function() {
-                     $(this).text(preview).fadeIn(200);
-                 });
-             }
-
-             // Event listeners
-             prefixInput.on('input', updatePreview);
-             formatTypeInputs.on('change', updatePreview);
-             digitLengthInput.on('input', updatePreview);
-
-             // Initial preview
-             updatePreview();
-
-             // Tambahkan validasi untuk prefix
-             prefixInput.on('input', function() {
-                 let value = $(this).val();
-                 // Hanya ijinkan huruf, angka, dan dash
-                 value = value.replace(/[^a-zA-Z0-9-]/g, '');
-                 $(this).val(value);
-             });
-
-             // Cache clear button handler
-             $('#clear-cache-button').on('click', function() {
-                 const button = $(this);
-                 const status = $('#cache-clear-status');
-
-                 if (button.prop('disabled')) {
-                     return;
-                 }
-
-                 button.prop('disabled', true)
-                       .addClass('updating-message');
-                 status.html('Clearing cache...')
-                       .css('color', '#666');
-
-                 $.ajax({
-                     url: ajaxurl,
-                     type: 'POST',
-                     data: {
-                         action: 'clear_crm_cache',
-                         nonce: $('#_wpnonce').val()
-                     },
-                     success: function(response) {
-                         if (response.success) {
-                             status.html('Cache cleared successfully!')
-                                   .css('color', '#46b450');
-                         } else {
-                             status.html('Failed to clear cache.')
-                                   .css('color', '#dc3232');
-                         }
-                     },
-                     error: function() {
-                         status.html('Error occurred while clearing cache.')
-                               .css('color', '#dc3232');
-                     },
-                     complete: function() {
-                         button.prop('disabled', false)
-                               .removeClass('updating-message');
-                         setTimeout(function() {
-                             status.fadeOut(500, function() {
-                                 $(this).html('').show();
-                             });
-                         }, 3000);
-                     }
-                 });
-             });
-         });
-         </script>
-
+             <?php submit_button('Save Settings'); ?>
+       </form>
      <?php elseif ($active_tab == 'permissions'): ?>
          <?php
          $settings = new Customer\Controllers\Settings_Controller();
          $settings->render_settings_page();
          ?>
      <?php endif; ?>
+
  </div>

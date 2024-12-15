@@ -39,21 +39,6 @@ class Admin_Controller {
             array($this, 'render_settings_page')
         );
 
-        // Tambahkan submenu Permissions
-        add_submenu_page(
-            'customer-management',     // Parent slug
-            'Permissions',            // Page title
-            'Permissions',            // Menu title
-            'manage_options',         // Capability
-            'customer-permissions',   // Menu slug
-            array($this, 'render_permissions_page')
-        );
-
-    }
-
-    public function render_permissions_page() {
-        $settings = new Settings_Controller();
-        $settings->render_settings_page();
     }
 
     public function enqueue_scripts() {
@@ -74,10 +59,13 @@ class Admin_Controller {
         // Settings & Permissions page
         if ($screen->id === 'customers_page_customer-settings') {
             wp_enqueue_style('settings-css', CUSTOMER_URL . 'assets/css/settings.css', array(), CUSTOMER_VERSION);
+            wp_enqueue_script('settings-js', CUSTOMER_URL . 'assets/js/settings.js', array('jquery'), CUSTOMER_VERSION, true);
 
             $current_tab = isset($_GET['tab']) ? sanitize_key($_GET['tab']) : 'system';
             if ($current_tab === 'permissions') {
                 wp_enqueue_script('permissions-js', CUSTOMER_URL . 'assets/js/permissions.js', array('jquery'), CUSTOMER_VERSION, true);
+                // Tambahkan ini jika diperlukan CSS khusus untuk permissions
+                //wp_enqueue_style('permissions-css', CUSTOMER_URL . 'assets/css/permissions.css', array('settings-css'), CUSTOMER_VERSION);
             }
         }
 
@@ -86,7 +74,7 @@ class Admin_Controller {
             'nonce' => wp_create_nonce('customer_plugin_nonce')
         ));
     }
-    
+
     public function render_main_page() {
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.'));
@@ -114,16 +102,5 @@ class Admin_Controller {
             echo 'Error: Settings view file not found.';
         }
     }
-/*
-    public function render_settings_page() {
-      if (!current_user_can('manage_options')) {
-          wp_die(__('You do not have sufficient permissions to access this page.'));
-      }
-
-      // Inisialisasi System Settings Controller
-      $system_settings = new System_Settings_Controller();
-      $system_settings->render_settings_page();
-  }
-  */
 
 }
