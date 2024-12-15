@@ -117,6 +117,54 @@ class Customer_Capabilities {
         remove_role('crm_manager');
         remove_role('crm_staff');
     }
+    
+    public static function initialize_default_caps() {
+        // Reset administrator capabilities
+        $admin = get_role('administrator');
+        foreach (self::$capabilities as $cap => $label) {
+            $admin->add_cap($cap);
+        }
+
+        // Reset CRM Manager capabilities
+        $manager = get_role('crm_manager');
+        if (!$manager) {
+            $manager = add_role('crm_manager', 'CRM Manager', array('read' => true));
+        }
+        // Reset ke default capabilities untuk CRM Manager
+        foreach (self::$capabilities as $cap => $label) {
+            $manager->remove_cap($cap); // Hapus semua caps dulu
+        }
+        // Tambahkan default caps
+        $manager_caps = array(
+            'crm_view_customers',
+            'crm_add_customer',
+            'crm_edit_customer',
+            'crm_view_staff',
+            'crm_view_reports'
+        );
+        foreach ($manager_caps as $cap) {
+            $manager->add_cap($cap);
+        }
+
+        // Reset CRM Staff capabilities
+        $staff = get_role('crm_staff');
+        if (!$staff) {
+            $staff = add_role('crm_staff', 'CRM Staff', array('read' => true));
+        }
+        // Reset ke default capabilities untuk CRM Staff
+        foreach (self::$capabilities as $cap => $label) {
+            $staff->remove_cap($cap); // Hapus semua caps dulu
+        }
+        // Tambahkan default caps
+        $staff_caps = array(
+            'crm_view_own_customers',
+            'crm_edit_own_customer',
+            'crm_view_staff'
+        );
+        foreach ($staff_caps as $cap) {
+            $staff->add_cap($cap);
+        }
+    }
 
     /**
      * Get all defined capabilities with their labels

@@ -25,7 +25,7 @@
  * Created:     2024-12-14
  * Modified:    2024-12-14
  */
- 
+
 namespace Customer\Controllers;
 
 class Admin_Controller {
@@ -111,14 +111,22 @@ class Admin_Controller {
 
         // Settings page
         if ($hook === 'customers_page_customer-settings' || $hook === 'customers_page_customer-permissions') {
+            // Common settings CSS & JS
             wp_enqueue_style('settings-css', CUSTOMER_URL . 'assets/css/settings.css', array(), CUSTOMER_VERSION);
             wp_enqueue_script('settings-js', CUSTOMER_URL . 'assets/js/settings.js', array('jquery'), CUSTOMER_VERSION, true);
 
-            // Localize script for settings page
             wp_localize_script('settings-js', 'customerSettings', array(
                 'ajaxurl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('customer_settings_nonce')
             ));
+
+            // Add permissions script if on permissions page
+            //if ($hook === 'customers_page_customer-permissions') {
+                wp_enqueue_script('customer-permissions-js', CUSTOMER_URL . 'assets/js/permissions.js', array('jquery'), CUSTOMER_VERSION, true);
+                wp_localize_script('customer-permissions-js', 'customerPermissions', array(
+                    'nonce' => wp_create_nonce('customer_permissions_nonce')
+                ));
+            //}
         }
     }
 

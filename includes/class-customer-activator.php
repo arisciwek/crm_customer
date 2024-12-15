@@ -28,5 +28,6 @@ class Customer_Activator {
 
         // Add capabilities
         Customer_Capabilities::add_caps();
+        
     }
 }
