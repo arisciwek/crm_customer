@@ -268,7 +268,7 @@
        </form>
      <?php elseif ($active_tab == 'permissions'): ?>
          <?php
-         $settings = new Customer\Controllers\Settings_Controller();
+         $settings = new Customer\Controllers\Permission_Settings_Controller();
          $settings->render_settings_page();
          ?>
      <?php endif; ?>
